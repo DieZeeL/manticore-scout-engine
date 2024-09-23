@@ -136,12 +136,15 @@ class ManticoreEngine extends Engine
      *
      * @param int $perPage
      * @param int $page
+     * @param int|null $offset
      *
      * @return mixed
      */
-    public function paginate(Builder $builder, $perPage, $page)
+    public function paginate(Builder $builder, $perPage, $page = 1, $offset = null)
     {
-        $offset = ($page - 1) * $perPage;
+        if (is_null($offset)) {
+            $offset = ($page - 1) * $perPage;
+        }
 
         $this->options = array_merge($this->options, $builder->model->scoutMetadata());
         $this->options['max_matches'] = $this->config['paginate_max_matches'] ?: ($offset + $perPage);
@@ -210,7 +213,8 @@ class ManticoreEngine extends Engine
         $objectIdPositions = array_flip($objectIds);
 
         return $model->getScoutModelsByIds(
-            $builder, $objectIds
+            $builder,
+            $objectIds
         )->filter(function ($model) use ($objectIds) {
             return in_array($model->getScoutKey(), $objectIds);
         })->sortBy(function ($model) use ($objectIdPositions) {
@@ -246,7 +250,8 @@ class ManticoreEngine extends Engine
         $objectIdPositions = array_flip($objectIds);
 
         return $model->queryScoutModelsByIds(
-            $builder, $objectIds
+            $builder,
+            $objectIds
         )->cursor()->filter(function ($model) use ($objectIds) {
             return in_array($model->getScoutKey(), $objectIds);
         })->sortBy(function ($model) use ($objectIdPositions) {
